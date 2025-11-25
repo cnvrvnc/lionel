@@ -3,51 +3,59 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # --- Konfigurasi Halaman ---
-st.set_page_config(layout="wide", page_title="Virtual Lab Grafik Fungsi Kuadrat")
+st.set_page_config(layout="wide", page_title="Virtual Lab Grafik Fungsi Kuadrat (Skala Besar)")
 
 st.title("🔬 Virtual Lab Grafik Fungsi Kuadrat")
 st.markdown("Aplikasi interaktif untuk memahami pengaruh koefisien **$a$**, **$b$**, dan **$c$** pada grafik fungsi kuadrat.")
+st.warning("Perhatian: Karena rentang nilai koefisien sangat besar (hingga ±100.000), grafik akan menjadi sangat lancip atau bergeser sangat jauh. Batas sumbu X dan Y akan disesuaikan secara dinamis agar grafik tetap terlihat.")
 
 st.divider()
 
 # --- Kontrol Interaktif (Sidebar) ---
 st.sidebar.header("Kontrol Koefisien F(x) = ax² + bx + c")
 
-# Koefisien a (Arah bukaan parabola)
+MAX_VAL = 100000.0
+
+# Koefisien a (Kecekungan/Kelancipan)
 a = st.sidebar.slider(
     '1. Nilai Koefisien a',
-    min_value=-2.0,
-    max_value=2.0,
-    value=1.0,
-    step=0.1,
-    help="Mengontrol arah bukaan parabola (a>0 ke atas, a<0 ke bawah) dan kelancipan grafik."
+    min_value=-MAX_VAL,
+    max_value=MAX_VAL,
+    value=100.0,
+    step=100.0, # Langkah 100
+    help=f"Rentang: -{MAX_VAL:g} s.d. {MAX_VAL:g}. Nilai a yang besar membuat parabola sangat sempit."
 )
 
-# Koefisien b (Menggeser sumbu simetri)
+# Koefisien b (Sumbu Simetri)
 b = st.sidebar.slider(
     '2. Nilai Koefisien b',
-    min_value=-5.0,
-    max_value=5.0,
-    value=0.0,
-    step=0.1,
-    help="Mengontrol posisi sumbu simetri/pergeseran horizontal."
+    min_value=-MAX_VAL,
+    max_value=MAX_VAL,
+    value=100.0,
+    step=100.0, # Langkah 100
+    help="Menggeser sumbu simetri secara horizontal."
 )
 
-# Koefisien c (Titik potong sumbu Y)
+# Koefisien c (Titik Potong Y)
 c = st.sidebar.slider(
     '3. Nilai Koefisien c',
-    min_value=-5.0,
-    max_value=5.0,
-    value=0.0,
-    step=0.1,
-    help="Mengontrol titik potong terhadap sumbu Y (pergeseran vertikal)."
+    min_value=-MAX_VAL,
+    max_value=MAX_VAL,
+    value=100.0,
+    step=1000.0, # Langkah 1000
+    help="Menggeser grafik secara vertikal."
 )
 
 # --- Tampilkan Formula ---
-# Membersihkan tampilan formula dari tanda + atau 0 yang tidak perlu
-formula_a = f"{a:g}x^2" if a != 0 else ""
-formula_b = f"{b:g}x" if b != 0 else ""
-formula_c = f"{c:g}" if c != 0 or (a == 0 and b == 0) else ""
+def format_value(val):
+    """Format angka besar ke notasi ilmiah jika diperlukan."""
+    if abs(val) >= 1000:
+        return f"{val:.2e}"
+    return f"{val:g}"
+
+formula_a = f"{format_value(a)}x^2" if a != 0 else ""
+formula_b = f"{format_value(b)}x" if b != 0 else ""
+formula_c = f"{format_value(c)}" if c != 0 or (a == 0 and b == 0) else ""
 
 # Atur tanda operator
 if formula_b and formula_a:
@@ -55,14 +63,11 @@ if formula_b and formula_a:
 if formula_c and (formula_a or formula_b):
     formula_c = f"+ {formula_c}" if c > 0 else f"- {-c:g}"
     
-# Gabungkan formula
 formula_display = f"$f(x) = {formula_a} {formula_b} {formula_c}$".replace("1x", "x").replace("-1x", "-x").replace(" ", "").replace("+-", "-")
 st.header("Persamaan Fungsi Kuadrat Saat Ini:")
 st.latex(formula_display.replace("f(x)=", ""))
 
 # --- Visualisasi Grafik ---
-x = np.linspace(-10, 10, 400)
-y = a * x**2 + b * x + c
 
 # Hitung Titik Puncak
 if a != 0:
@@ -72,11 +77,39 @@ else:
     x_puncak = 0
     y_puncak = c
 
+# --- LOGIKA BATAS SUMBU (SANGAT ADAPTIF) ---
+
+# Tentukan rentang X yang akan diplot, berpusat pada x_puncak
+if abs(a) > 1000:
+    # Jika a sangat besar, gunakan rentang x yang sangat kecil (parabola sangat lancip)
+    x_range_display = 2 / abs(a)**0.5 if abs(a) > 0 else 10 # agar range x lebih masuk akal
+    x = np.linspace(x_puncak - x_range_display, x_puncak + x_range_display, 400)
+elif a == 0:
+    # Kasus linear/konstan
+    x = np.linspace(-10, 10, 400)
+else:
+    # a tidak terlalu besar, gunakan rentang x sedang
+    x_range_display = 10 
+    x = np.linspace(x_puncak - x_range_display/2, x_puncak + x_range_display/2, 400)
+
+y = a * x**2 + b * x + c
+
+# Tentukan rentang Y
+min_y_plot = np.min(y)
+max_y_plot = np.max(y)
+y_buffer = max(100.0, (max_y_plot - min_y_plot) * 0.1) # Buffer minimal 100 atau 10% dari rentang plot
+
+ax_min_y = min_y_plot - y_buffer
+ax_max_y = max_y_plot + y_buffer
+
 # Buat Plot Matplotlib
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.plot(x, y, label=f"a={a}, b={b}, c={c}", color='orange', linewidth=3)
-ax.scatter(x_puncak, y_puncak, color='red', zorder=5, label='Titik Puncak') 
-ax.scatter(0, c, color='blue', zorder=5, label='Titik Potong Y')
+ax.plot(x, y, label=f"a={format_value(a)}, b={format_value(b)}, c={format_value(c)}", color='orange', linewidth=3)
+
+# Scatter hanya jika nilai titik puncak dan c berada dalam rentang plot
+if ax_min_y <= y_puncak <= ax_max_y and ax_min_y <= c <= ax_max_y:
+    ax.scatter(x_puncak, y_puncak, color='red', zorder=5, label='Titik Puncak') 
+    ax.scatter(0, c, color='blue', zorder=5, label='Titik Potong Y')
 
 # Pengaturan Sumbu dan Garis Bantu
 ax.axhline(0, color='gray', linewidth=0.8, linestyle='--')
@@ -86,36 +119,29 @@ ax.set_xlabel('Sumbu X', fontsize=12)
 ax.set_ylabel('Sumbu Y / f(x)', fontsize=12)
 ax.set_title('Grafik Parabola', fontsize=14)
 
-# Batasan Sumbu Y (agar grafik selalu terlihat)
-min_y = min(y) if len(y) > 0 else 0
-max_y = max(y) if len(y) > 0 else 0
+# Terapkan batas sumbu yang adaptif
+ax.set_xlim(x.min(), x.max()) 
+ax.set_ylim(ax_min_y, ax_max_y)
 
-# Batas y minimum yang baik
-if a != 0:
-    min_y_display = y_puncak - 5 if a > 0 and y_puncak > -5 else min_y - 2
-    max_y_display = y_puncak + 5 if a < 0 and y_puncak < 5 else max_y + 2
-else:
-    min_y_display = c - 5
-    max_y_display = c + 5
-
-ax.set_ylim(min_y_display, max_y_display)
-ax.set_xlim(-5, 5) # Fokuskan di range -5 sampai 5 untuk x
 ax.legend()
 
 # Tampilkan plot ke Streamlit
-st.pyplot(fig)
+st.pyplot(fig) 
+
+[Image of a parabola graph showing the vertex and intercepts]
+
 
 st.divider()
 
 # --- Display Informasi Titik Penting & Analisis ---
-st.subheader("Titik Penting dan Analisis")
+st.subheader("Titik Penting dan Analisis (dalam Notasi Ilmiah jika besar)")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
     st.metric(
         label="Titik Potong Sumbu Y (c)",
-        value=f"(0, {c:.1f})",
+        value=f"(0, {format_value(c)})",
         delta="Geseran Vertikal"
     )
 
@@ -123,7 +149,7 @@ with col2:
     if a != 0:
         st.metric(
             label="Sumbu Simetri (x = -b/2a)",
-            value=f"x = {x_puncak:.2f}"
+            value=f"x = {format_value(x_puncak)}"
         )
     else:
         st.info("Koefisien 'a' = 0. Ini adalah fungsi linear.")
@@ -132,16 +158,16 @@ with col3:
     if a != 0:
         st.metric(
             label=f"Titik Puncak/Balik ({'Minimum' if a > 0 else 'Maksimum'})",
-            value=f"({x_puncak:.2f}, {y_puncak:.2f})"
+            value=f"({format_value(x_puncak)}, {format_value(y_puncak)})"
         )
 
 st.subheader("💡 Kesimpulan Interaktif")
 st.info(f"""
-1.  **Pengaruh 'a' ({a:.1f}):**
-    * Jika Anda menggeser $a$ menjadi **positif** ($a>0$), parabola terbuka **ke atas** dan memiliki titik **minimum**.
-    * Jika Anda menggeser $a$ menjadi **negatif** ($a<0$), parabola terbuka **ke bawah** dan memiliki titik **maksimum**.
-2.  **Pengaruh 'b' ({b:.1f}):**
-    * Mengontrol pergeseran horizontal grafik dengan mengubah posisi sumbu simetri $x = -b/(2a)$.
-3.  **Pengaruh 'c' ({c:.1f}):**
-    * Mengontrol pergeseran vertikal, yaitu tempat grafik **memotong sumbu Y** di titik **(0, c)**.
+1.  **Pengaruh 'a' ({format_value(a)}):**
+    * **Kecekungan:** Jika $a>0$, terbuka ke atas. Jika $a<0$, terbuka ke bawah.
+    * **Lebar Grafik:** Karena $|a|$ bisa mencapai $100.000$, parabola akan menjadi **sangat sempit** (mirip garis vertikal) saat $|a|$ besar.
+2.  **Pengaruh 'b' ({format_value(b)}):**
+    * Mengontrol pergeseran horizontal sumbu simetri $x = -b/(2a)$. Karena pembagi $2a$ juga bisa sangat besar, sumbu simetri mungkin mendekati 0.
+3.  **Pengaruh 'c' ({format_value(c)}):**
+    * Mengontrol pergeseran vertikal, yaitu tempat grafik **memotong sumbu Y** di $(0, c)$. Nilai $c$ yang besar akan menggeser seluruh grafik jauh ke atas atau ke bawah.
 """)

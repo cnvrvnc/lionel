@@ -126,10 +126,7 @@ ax.set_ylim(ax_min_y, ax_max_y)
 ax.legend()
 
 # Tampilkan plot ke Streamlit
-st.pyplot(fig) 
-
-[Image of a parabola graph showing the vertex and intercepts]
-
+st.pyplot(fig)
 
 st.divider()
 

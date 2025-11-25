@@ -61,7 +61,7 @@ if formula_b and formula_a:
 if formula_c and (formula_a or formula_b):
     formula_c = f"+ {formula_c}" if c > 0 else f"- {-c:g}"
     
-formula_display = f"$f(x) = {formula_a} {formula_b} {formula_c}$".replace("1x", "x").replace("-1x", "-x").replace(" ", "").replace("+-", "-")
+formula_display = f"$f(x) = {formula_a} {formula_b} {formula_c}$".replace("1x", "x").replace("1x", "x").replace("-1x", "-x").replace(" ", "").replace("+-", "-")
 st.header("Persamaan Fungsi Kuadrat Saat Ini:")
 st.latex(formula_display.replace("f(x)=", ""))
 
@@ -110,10 +110,7 @@ ax.set_ylim(ax_min_y, ax_max_y)
 ax.legend()
 
 # Tampilkan plot ke Streamlit
-st.pyplot(fig) 
-
-[Image of a parabola graph showing the vertex and intercepts]
-
+st.pyplot(fig)
 
 st.divider()
 

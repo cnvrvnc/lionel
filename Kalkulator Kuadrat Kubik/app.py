@@ -1,24 +1,39 @@
-def hitung_pangkat(bilangan):
-    """Menghitung kuadrat dan kubik dari sebuah bilangan."""
+import streamlit as st
 
-    kuadrat = bilangan ** 2  # Pangkat 2
-    kubik = bilangan ** 3    # Pangkat 3
+# --- Fungsi untuk Luas Persegi ---
+def luas_persegi(sisi):
+  """Menghitung luas persegi: sisi * sisi"""
+  luas = sisi * sisi
+  return luas
 
-    return kuadrat, kubik
+# --- Konfigurasi Halaman Streamlit ---
+st.set_page_config(
+    page_title="Kalkulator Luas Persegi",
+    page_icon="📐",
+    layout="centered"
+)
 
-# --- Penggunaan Program ---
+st.title('📐 Kalkulator Luas Persegi Sederhana')
+st.caption('Aplikasi ini menghitung luas persegi menggunakan Streamlit.')
 
-# Input
-try:
-    angka = float(input("Masukkan sebuah bilangan: "))
+# --- Input dari Pengguna ---
+# Gunakan st.number_input untuk input numerik
+s = st.number_input(
+    'Masukkan panjang sisi persegi (satuan)',
+    min_value=0.0,  # Memastikan sisi tidak negatif
+    value=10.0,     # Nilai default
+    step=0.5
+)
 
+# --- Perhitungan dan Output ---
+# Tombol untuk memicu perhitungan
+if st.button('Hitung Luas'):
     # Panggil fungsi
-    hasil_kuadrat, hasil_kubik = hitung_pangkat(angka)
+    hasil_luas = luas_persegi(s)
 
-    # Output
-    print(f"\n--- Hasil Pangkat dari {angka:.2f} ---")
-    print(f"Kuadrat (Pangkat 2): {hasil_kuadrat:.2f}")
-    print(f"Kubik (Pangkat 3): {hasil_kubik:.2f}")
+    # Tampilkan hasil
+    st.success(f"**Luas persegi** dengan sisi **{s}** adalah:")
+    st.markdown(f"## {hasil_luas:.2f} satuan persegi")
 
-except ValueError:
-    print("Input tidak valid. Harap masukkan bilangan.")
+    # Opsional: Tampilkan rumus
+    st.info(f"Rumus: Luas = sisi * sisi = {s} * {s} = {hasil_luas:.2f}")

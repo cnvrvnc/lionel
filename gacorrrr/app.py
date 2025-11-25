@@ -7,7 +7,7 @@ st.set_page_config(layout="wide", page_title="Virtual Lab Grafik Fungsi Kuadrat 
 
 st.title("🔬 Virtual Lab Grafik Fungsi Kuadrat")
 st.markdown("Aplikasi interaktif untuk memahami pengaruh koefisien **$a$**, **$b$**, dan **$c$** pada grafik fungsi kuadrat.")
-st.warning("Perhatian: Karena rentang nilai koefisien sangat besar (hingga ±100.000), grafik akan menjadi sangat lancip atau bergeser sangat jauh. Batas sumbu X dan Y akan disesuaikan secara dinamis agar grafik tetap terlihat.")
+st.warning("Perhatian: Rentang nilai koefisien sangat besar (hingga ±100.000). Batas sumbu X dan Y akan disesuaikan secara dinamis agar grafik tetap terlihat.")
 
 st.divider()
 
@@ -165,9 +165,9 @@ st.subheader("💡 Kesimpulan Interaktif")
 st.info(f"""
 1.  **Pengaruh 'a' ({format_value(a)}):**
     * **Kecekungan:** Jika $a>0$, terbuka ke atas. Jika $a<0$, terbuka ke bawah.
-    * **Lebar Grafik:** Karena $|a|$ bisa mencapai $100.000$, parabola akan menjadi **sangat sempit** (mirip garis vertikal) saat $|a|$ besar.
+    * **Lebar Grafik:** Karena $|a|$ bisa mencapai $100.000$, perubahan kecil pada $x$ akan menghasilkan perubahan besar pada $y$, membuat parabola sangat sempit.
 2.  **Pengaruh 'b' ({format_value(b)}):**
-    * Mengontrol pergeseran horizontal sumbu simetri $x = -b/(2a)$. Karena pembagi $2a$ juga bisa sangat besar, sumbu simetri mungkin mendekati 0.
+    * Mengontrol pergeseran horizontal sumbu simetri $x = -b/(2a)$.
 3.  **Pengaruh 'c' ({format_value(c)}):**
-    * Mengontrol pergeseran vertikal, yaitu tempat grafik **memotong sumbu Y** di $(0, c)$. Nilai $c$ yang besar akan menggeser seluruh grafik jauh ke atas atau ke bawah.
+    * Mengontrol pergeseran vertikal, yaitu tempat grafik **memotong sumbu Y** di $(0, c)$.
 """)

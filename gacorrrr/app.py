@@ -10,11 +10,6 @@ st.markdown("Aplikasi interaktif untuk memahami pengaruh koefisien **$a$**, **$b
 
 st.divider()
 
-# 
-
-[Image of a parabola graph showing the vertex and intercepts]
-
-
 # --- Kontrol Interaktif (Sidebar) ---
 st.sidebar.header("Kontrol Koefisien F(x) = ax² + bx + c")
 
@@ -94,15 +89,14 @@ ax.set_title('Grafik Parabola', fontsize=14)
 # Batasan Sumbu Y (agar grafik selalu terlihat)
 min_y = min(y) if len(y) > 0 else 0
 max_y = max(y) if len(y) > 0 else 0
-y_limit = max(abs(min_y), abs(max_y)) + 2
 
 # Batas y minimum yang baik
 if a != 0:
-    min_y_display = y_puncak - 5 if a > 0 else min_y - 2
-    max_y_display = y_puncak + 5 if a < 0 else max_y + 2
+    min_y_display = y_puncak - 5 if a > 0 and y_puncak > -5 else min_y - 2
+    max_y_display = y_puncak + 5 if a < 0 and y_puncak < 5 else max_y + 2
 else:
-    min_y_display = -5
-    max_y_display = 5
+    min_y_display = c - 5
+    max_y_display = c + 5
 
 ax.set_ylim(min_y_display, max_y_display)
 ax.set_xlim(-5, 5) # Fokuskan di range -5 sampai 5 untuk x
